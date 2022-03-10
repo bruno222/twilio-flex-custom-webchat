@@ -22,9 +22,13 @@ var bodyParser = require('body-parser');
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.post('/new-message', function (request, response) {
-  console.log('Twilio new message webhook fired');
+app.post('/new-message', async (request, response) => {
+  const { From, WaId, Body } = request.body;
+
+  console.log('post /new message', JSON.stringify(request.body, null, 2));
+  // console.log('Twilio new message webhook fired');
   if (request.body.Source === 'SDK') {
+    await flex.sendWhatsappMessage('whatsapp:+14155238886', Body, 'whatsapp:+4917672899431');
     io.emit('chat message', request.body.Body);
   }
   response.sendStatus(200);
@@ -38,11 +42,33 @@ app.post('/channel-update', function (request, response) {
   response.sendStatus(200);
 });
 
+// {
+//   SmsMessageSid: 'SMc68bae49611e717d9302841a39a75b85',
+//   NumMedia: '0',
+//   ProfileName: 'Bruno',
+//   SmsSid: 'SMc68bae49611e717d9302841a39a75b85',
+//   WaId: '4917672899431',
+//   SmsStatus: 'received',
+//   Body: '1 2 3',
+//   To: 'whatsapp:+14155238886',
+//   NumSegments: '1',
+//   MessageSid: 'SMc68bae49611e717d9302841a39a75b85',
+//   AccountSid: 'AC60c3a3ca028d6b62bf2651db58105ad9',
+//   From: 'whatsapp:+4917672899431',
+//   ApiVersion: '2010-04-01'
+// }
+app.post('/whatsapp-to-flex', function (request, response) {
+  console.log('post /whatsapp-to-flex', request.body);
+  const { From, WaId, Body } = request.body;
+  flex.sendMessageToFlex(Body, From);
+  response.end();
+});
+
 io.on('connection', function (socket) {
   console.log('User connected');
   socket.on('chat message', function (msg) {
     console.log('msg', msg);
-    flex.sendMessageToFlex(msg);
+    flex.sendMessageToFlex(msg, 'test123');
     io.emit('chat message', msg);
   });
 });
