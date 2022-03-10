@@ -6,28 +6,25 @@ Inquirer.prompt([
   {
     type: 'string',
     name: 'twilioAccountSid',
-    message: 'Twilio Account SID'
+    message: 'Twilio Account SID',
   },
   {
     type: 'password',
     name: 'twilioAuthToken',
-    message: 'Twilio Auth Token'
+    message: 'Twilio Auth Token',
   },
   {
     type: 'string',
     name: 'studioFlowSid',
-    message: 'Studio Flow SID'
+    message: 'Studio Flow SID',
   },
   {
     type: 'string',
     name: 'flexChatServiceSid',
-    message: 'Flex Chat Service SID'
-  }
-]).then(answers => {
-  const client = require('twilio')(
-    answers.twilioAccountSid,
-    answers.twilioAuthToken
-  );
+    message: 'Flex Chat Service SID',
+  },
+]).then((answers) => {
+  const client = require('twilio')(answers.twilioAccountSid, answers.twilioAuthToken);
 
   var flowOptions = {
     integrationType: 'studio',
@@ -36,21 +33,22 @@ Inquirer.prompt([
     'integration.flowSid': answers.studioFlowSid,
     contactIdentity: 'contact-identity',
     friendlyName: 'Flex Custom Channel Flow',
-    chatServiceSid: answers.flexChatServiceSid
+    chatServiceSid: answers.flexChatServiceSid,
   };
 
   client.flexApi.flexFlow
     .create(flowOptions)
-    .then(flexFlow => {
+    .then((flexFlow) => {
       console.log(`Created Flex Flow ${flexFlow.sid}`);
-      envFileContent = `TWILIO_ACCOUNT_SID=${answers.twilioAccountSid}\n` 
-        + `TWILIO_AUTH_TOKEN=${answers.twilioAuthToken}\n`
-        + `FLEX_FLOW_SID=${flexFlow.sid}\n`
-        + `FLEX_CHAT_SERVICE=${answers.flexChatServiceSid}`
+      envFileContent =
+        `TWILIO_ACCOUNT_SID=${answers.twilioAccountSid}\n` +
+        `TWILIO_AUTH_TOKEN=${answers.twilioAuthToken}\n` +
+        `FLEX_FLOW_SID=${flexFlow.sid}\n` +
+        `FLEX_CHAT_SERVICE=${answers.flexChatServiceSid}`;
 
-      fs.writeFileSync('middleware/.env',envFileContent)
+      fs.writeFileSync('middleware/.env', envFileContent);
     })
-    .catch(error => {
+    .catch((error) => {
       console.log(error);
     });
 });
